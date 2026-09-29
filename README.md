@@ -7,19 +7,23 @@ A plain HTML/JS app (PWA). Flashcards are stored in Firebase Firestore and are p
 | File | Purpose |
 |---|---|
 | `index.html` | The whole app |
-| `config.js` | Your Firebase project settings (not secret; the security rules protect the data) |
+| `config.js` | Firebase project settings (not secret; the security rules protect the data) |
 | `firestore.rules` | Security rules: each user can only read and write their own data |
 | `sw.js`, `manifest.json`, `icon.svg` | Offline use and "Add to Home screen" |
 
 ---
+# Resources
+1. https://a20sarle.github.io/flashcards/
+2. https://firebase.google.com/
+---
 
-## One-time setup
+## Setup record (what was done, in order)
 
-You need a Google account. All steps are done in your browser.
+All six steps are **completed**. Follow them again to rebuild the setup from scratch.
 
 ### Step 1. Create a Firebase project
 1. Open <https://console.firebase.google.com> and click **Create a project**.
-2. Name it (for example `Flashcards`) and finish the wizard. The free **Spark plan** is enough.
+2. Name: `Flashcards` (project ID `flashcards-290df`), free **Spark plan**.
 
 ### Step 2. Turn on Google sign-in
 1. In the console, click the **magnifier** in the left sidebar and search for **Authentication**.
@@ -29,7 +33,7 @@ You need a Google account. All steps are done in your browser.
 
 ### Step 3. Create the database and add the security rules
 1. Search for **Firestore Database** and click **Create database**.
-2. Choose a location: **eur3** (Europe multi-region) is recommended. It **cannot be changed later**.
+2. Location: **eur3** (Europe multi-region), chosen for availability and EU data storage. It **cannot be changed later**.
 3. Choose **Start in production mode**, then click **Create**.
 4. Open the **Rules** tab and replace everything with the contents of `firestore.rules`.
 5. Click **Publish**.
@@ -37,18 +41,19 @@ You need a Google account. All steps are done in your browser.
 ### Step 4. Register the web app and fill in `config.js`
 1. Click the **gear** icon in the left sidebar, then **General**.
 2. Scroll to **Your apps** and click the **`</>`** (web) icon.
-3. Give the app a nickname (for example `Flashcards web`). Leave **Firebase Hosting** unticked and click **Register app**.
+3. Nickname (for example `Flashcards web`). Leave **Firebase Hosting** unticked and click **Register app**.
 4. Copy `apiKey`, `authDomain`, `projectId` and `appId` from the code shown into `config.js`.
 
 ### Step 5. Publish the site on GitHub Pages
-1. Create a new repository on GitHub and upload the contents of this folder.
-2. In the repository, open **Settings > Pages**.
-3. Under **Build and deployment**, choose **Deploy from a branch**, select branch `main` and folder `/ (root)`, then **Save**.
-4. After a minute the site is live at `https://<your-username>.github.io/<repository-name>/`.
+1. On <https://github.com> click **+ > New repository**.
+2. Name it (for example `flashcards`), set it to **Public**, and leave **README, .gitignore and license unticked**. Click **Create repository**.
+3. On the empty repo page click **uploading an existing file**. Drag in the files from `C:\SF\SaraFlashcardsWeb` (the files themselves, not the folder, so `index.html` is at the top level) and click **Commit changes**.
+4. Go to **Settings > Pages > Build and deployment**, choose **Deploy from a branch**, branch `main`, folder `/ (root)`, and **Save**.
+5. After a minute the site is live at `https://<your-username>.github.io/<repository-name>/`.
 
 ### Step 6. Allow your site to sign in
 1. In the Firebase console, open **Authentication > Settings > Authorized domains**.
-2. Click **Add domain** and enter `<your-username>.github.io`.
+2. Click **Add domain** and enter only `<your-username>.github.io` (no `https://`, no repository name).
 
 Without this step, the Google sign-in popup fails on the published site.
 
@@ -60,6 +65,10 @@ Without this step, the Google sign-in popup fails on the published site.
 - **Phone:** open the same URL in Chrome, sign in with the same account, then use the browser menu > **Add to Home screen**.
 - **Bring over the Android data:** on the deck list tap **Restore** and select the Android app's backup `.json`. Old rich text (bold, colors, sizes) is converted automatically.
 - **Backup:** **Backup** downloads all decks and cards as a `.json` file. The Android app cannot read this newer format.
+
+## Updating the site
+
+Edit the files, then on GitHub use **Add file > Upload files** (or the pencil icon on a single file) and commit. Pages redeploys in about a minute. Refresh twice, because the app caches files for offline use.
 
 ## Test locally (optional)
 
@@ -78,4 +87,11 @@ Then open <http://localhost:8000>. `localhost` is already an authorized domain i
 | Sign-in popup closes or shows an error | Your domain is missing from **Authorized domains** (Step 6) |
 | "Missing or insufficient permissions" | The rules were not published (Step 3) |
 | Page stays on "Loading…" | `config.js` still contains placeholder values |
+| 404 on the Pages URL | Pages not yet deployed, or `index.html` is not at the top level of the repo |
 | Changes to the site do not show up | Refresh twice; the app caches files for offline use |
+
+## Ideas for later
+
+- **License (not added yet):** without a license, nobody may legally reuse the code. To require attribution, add the MIT License: **Add file > Create new file**, filename `LICENSE`, click **Choose a license template**, pick **MIT License**, enter your name, and commit.
+- **ChatApp:** the same setup (PWA + Firebase) can be reused. Decide early whether end-to-end encryption is needed.
+- **Scale:** keep all Firebase calls in one place so the backend can be swapped or extended.
