@@ -79,19 +79,3 @@ python -m http.server 8000
 ```
 
 Then open <http://localhost:8000>. `localhost` is already an authorized domain in Firebase.
-
-## Troubleshooting
-
-| Problem | Likely cause |
-|---|---|
-| Sign-in popup closes or shows an error | Your domain is missing from **Authorized domains** (Step 6) |
-| "Missing or insufficient permissions" | The rules were not published (Step 3) |
-| Page stays on "Loading…" | `config.js` still contains placeholder values |
-| 404 on the Pages URL | Pages not yet deployed, or `index.html` is not at the top level of the repo |
-| Changes to the site do not show up | Refresh twice; the app caches files for offline use |
-
-## Ideas for later
-
-- **License (not added yet):** without a license, nobody may legally reuse the code. To require attribution, add the MIT License: **Add file > Create new file**, filename `LICENSE`, click **Choose a license template**, pick **MIT License**, enter your name, and commit.
-- **ChatApp:** the same setup (PWA + Firebase) can be reused. Decide early whether end-to-end encryption is needed.
-- **Scale:** keep all Firebase calls in one place so the backend can be swapped or extended.
