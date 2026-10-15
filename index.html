@@ -2,42 +2,236 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Sara's Flashcards</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.svg">
-<meta name="theme-color" content="#FFF8E7">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#F6F4FC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E0C1B" media="(prefers-color-scheme: dark)">
 <style>
-*{box-sizing:border-box}
-body{margin:0;font:16px system-ui,sans-serif;background:#FFF8E7;color:#2D2A4A}
-#app{max-width:640px;margin:auto;padding:12px 16px 110px}
-h1{font-size:26px;font-weight:800;margin:8px 0;flex:1}
-button,.btn{font:inherit;font-weight:800;border:0;border-radius:28px;padding:14px 18px;color:#fff;background:#9B5DE5;cursor:pointer;text-align:center}
-button:disabled{opacity:.35}
-.coral{background:#FF6B6B}.sky{background:#4D96FF}.mint{background:#3FBF6A}.sun{background:#FFD93D;color:#2D2A4A}
-header,.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}
-header button,.bar button,.bar .btn{background:none;color:#2D2A4A;padding:8px 12px}
-.tile{display:flex;align-items:center;gap:12px;color:#fff;border-radius:28px;padding:16px;margin:12px 0;cursor:pointer;box-shadow:0 3px 6px #0003}
-.tile>div{flex:1;font-weight:600}.tile b{font-size:21px}.em{font-size:30px}
-.tile button{background:#fff3;padding:8px 10px}
-.crow{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid #9B5DE5;border-radius:20px;padding:8px 12px;margin:10px 0}
-.crow>div{flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.crow input{width:22px;height:22px}
-.crow button{background:none;padding:6px}
-.fab{position:fixed;right:20px;bottom:20px;background:#FF6B6B;box-shadow:0 3px 8px #0004}
-.tb{display:flex;gap:6px;overflow-x:auto;padding:6px 0}
-.tb button{background:#9B5DE51F;color:#9B5DE5;padding:6px 10px;border-radius:12px;flex:none}
-.tb .sw{width:28px;height:28px;padding:0;border:1.5px solid #0003;border-radius:50%}
-.ed{min-height:110px;background:#fff;border:2px solid;border-radius:20px;padding:12px;font-size:18px}
-h3{color:#fff;display:inline-block;padding:4px 16px;border-radius:18px 18px 18px 0;margin:16px 0 0}
-.face{border:4px solid #4D96FF;background:#DCEBFF;border-radius:32px;padding:20px;text-align:center;font-size:26px;min-height:50vh;display:flex;flex-direction:column;justify-content:center;margin:16px 0}
-.face.b{border-color:#F15BB5;background:#FFDDF0}
-.face small{font:800 13px system-ui;color:#2D2A4A99;margin-bottom:8px}
-.sm{min-height:0;font-size:22px;margin:10px 0;opacity:.6}.sm.on{opacity:1;border-width:7px}
-.c{text-align:center;padding-top:20vh}
-#rd{position:fixed;inset:0;background:#0006;display:flex;padding:12px}
-.box{background:#FFF8E7;border-radius:28px;padding:16px;margin:auto;width:100%;max-width:600px;max-height:100%;overflow-y:auto}
-select{width:100%;font:inherit;padding:8px;margin:10px 0}
+:root{
+  --bg:#F6F4FC;--surface:#fff;--ink:#1F1B3A;--muted:#6E6A8A;--line:#E7E3F2;
+  --primary:#6C4DF6;--primary2:#8F76FF;--danger:#E5484D;--heart:#F0386B;
+  --shadow:0 1px 2px rgba(31,27,58,.06),0 8px 24px rgba(31,27,58,.08);--r:20px;
+  --txt:12px; /* standard size of card text (editor, practice, read aloud) */
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0E0C1B;--surface:#19162D;--ink:#F3F1FF;--muted:#A6A1C6;--line:#2A2646;--primary:#8B73FF;--primary2:#A692FF;
+  --shadow:0 1px 2px #0006,0 8px 24px #0005}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+button:focus-visible,[role=button]:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--primary2);outline-offset:2px}
+svg.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#app{max-width:760px;margin:0 auto;padding:0 16px calc(120px + env(safe-area-inset-bottom))}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:999px;font-weight:700;
+  background:var(--primary);color:#fff;transition:transform .12s,filter .12s;text-align:center}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.soft{background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary)}
+.btn.ghost{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink)}
+.btn.danger{background:var(--danger)}
+.ib{width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none;color:var(--ink)}
+.ib:hover{background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}
+
+/* app bar + home header */
+.bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:4px;margin:0 -16px;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;
+  background:color-mix(in srgb,var(--bg) 86%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.bar h1{flex:1;min-width:0;margin:0 4px;font-size:22px;font-weight:800;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hero-t{padding:calc(28px + env(safe-area-inset-top)) 4px 6px;display:flex;align-items:center;gap:14px}
+.logo{width:56px;height:56px;border-radius:16px;flex:none;box-shadow:0 2px 10px rgba(240,56,107,.25)}
+.logo.big{width:104px;height:104px;border-radius:28px}
+.hero-t h1{font-size:clamp(24px,7.4vw,34px);line-height:1.1;margin:0;font-weight:850;letter-spacing:-.025em}
+.hero-t p{margin:6px 0 0;color:var(--muted);font-weight:600}
+.sec{margin:30px 4px 10px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.testbar{margin:0 -16px;padding:6px 16px;background:#FFD93D;color:#1F1B3A;font-size:13px;font-weight:600;text-align:center}
+.testbar a{color:inherit;font-weight:800}
+
+/* home: deck grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin:18px 0 0}
+.deck{position:relative;border-radius:26px;padding:16px;min-height:150px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;
+  cursor:pointer;box-shadow:var(--shadow);overflow:hidden;transition:transform .15s}
+.deck:active{transform:scale(.98)}
+.deck .em{font-size:28px;width:52px;height:52px;border-radius:16px;background:#ffffff33;display:grid;place-items:center}
+.deck h3{margin:0 0 2px;font-size:19px;font-weight:800;line-height:1.2;overflow-wrap:anywhere}
+.deck small{opacity:.92;font-weight:600}
+.deck .acts{position:absolute;top:10px;right:10px;display:flex;gap:4px}
+.deck .acts button{width:38px;height:38px;border-radius:50%;background:#ffffff2e;color:#fff;display:grid;place-items:center}
+
+/* lists */
+.list{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.row2{display:flex;align-items:center;gap:10px;padding:10px 8px 10px 14px;border-top:1px solid var(--line)}
+.row2:first-child{border-top:0}
+.row2 .txt{flex:1;min-width:0}
+.row2 .txt b,.row2 .txt span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row2 .txt span{color:var(--muted);font-size:14px}
+.crow .txt{cursor:pointer;padding:4px 0}
+.sw{appearance:none;-webkit-appearance:none;width:46px;height:28px;border-radius:999px;background:color-mix(in srgb,var(--ink) 18%,transparent);
+  position:relative;flex:none;margin:0;transition:background .2s;cursor:pointer}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0004;transition:transform .2s}
+.sw:checked{background:var(--primary)}.sw:checked::after{transform:translateX(18px)}
+.empty{text-align:center;padding:44px 24px;color:var(--muted)}
+.empty .big{font-size:60px;line-height:1}.empty h2{color:var(--ink);margin:12px 0 4px;font-size:21px}.empty p{margin:0 0 18px}
+
+/* deck page */
+.dhero{border-radius:28px;padding:20px;color:#fff;box-shadow:var(--shadow);margin:6px 0 14px}
+.dhero .stat{font-weight:700;font-size:15px;opacity:.95}
+.dhero .btns{display:flex;gap:10px;margin-top:16px}.dhero .btn{flex:1;padding:0 10px;white-space:nowrap}
+.dhero .btn.p{background:#fff}.dhero .btn.t{background:#ffffff33;color:#fff}
+.voice{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:16px;padding:2px 12px;box-shadow:var(--shadow);margin:12px 0;color:var(--muted)}
+.voice select{flex:1;min-width:0;border:0;background-color:var(--surface);font:inherit;font-weight:600;color:var(--ink);padding:12px 0;outline:0}
+/* the drop-down list of a select is drawn by the browser: give it real colours, or light text can end up on a white list */
+select option,select optgroup{background-color:var(--surface);color:var(--ink)}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:16px;padding:0 14px;box-shadow:var(--shadow);margin:12px 0;color:var(--muted)}
+.search input{border:0;background:none;font:inherit;padding:13px 0;width:100%;outline:0;color:var(--ink)}
+.fab{position:fixed;right:max(18px,calc(50% - 362px));bottom:calc(20px + env(safe-area-inset-bottom));z-index:6;height:56px;padding:0 22px;border-radius:999px;
+  background:var(--primary);color:#fff;font-weight:800;display:flex;align-items:center;gap:8px;box-shadow:0 10px 28px color-mix(in srgb,var(--primary) 45%,transparent)}
+.fab:active{transform:scale(.96)}
+
+/* dialogs and toast */
+.scrim{position:fixed;inset:0;z-index:200;background:rgba(15,12,30,.5);display:flex;align-items:flex-end;justify-content:center;animation:fade .15s}
+.sheet{width:100%;max-width:480px;max-height:100%;overflow-y:auto;background:var(--surface);color:var(--ink);border-radius:28px 28px 0 0;
+  padding:22px 20px calc(20px + env(safe-area-inset-bottom));animation:up .22s ease-out}
+@media (min-width:560px){.scrim{align-items:center;padding:20px}.sheet{border-radius:28px}}
+.sheet h2{margin:0 0 6px;font-size:20px}.sheet p{margin:0 0 14px;color:var(--muted)}
+.sheet input[type=text]{width:100%;font:inherit;padding:14px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);margin:8px 0 16px;outline:0}
+.sheet input[type=text]:focus{border-color:var(--primary)}
+.sheet .actions{display:flex;gap:10px}.sheet .actions .btn{flex:1}
+@keyframes fade{from{opacity:0}}@keyframes up{from{transform:translateY(30px);opacity:0}}
+#toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;pointer-events:none;z-index:300;
+  background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:16px;display:flex;gap:16px;align-items:center;box-shadow:var(--shadow);
+  transition:opacity .2s,transform .2s;width:max-content;max-width:calc(100% - 32px);font-weight:600}
+#toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast button{color:var(--primary2);font-weight:800}
+
+/* reader (read aloud) */
+.sheet.player{display:flex;flex-direction:column;height:min(86vh,720px);padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+.player .phead{display:flex;align-items:center;gap:6px;margin-bottom:8px}.player .phead h2{flex:1;margin:0 0 0 4px;font-size:18px}
+.plist{position:relative;flex:1;min-height:0;overflow-y:auto;margin:0 -6px;padding:0 6px;overscroll-behavior:contain}
+.rrow{position:relative;margin:4px 0;padding:10px 10px 10px 38px;border-radius:18px;opacity:.5;cursor:pointer;
+  transition:opacity .7s ease,background-color .7s ease}
+.rrow.cur{opacity:1;background:color-mix(in srgb,var(--primary) 10%,transparent)}
+.rrow .rn{position:absolute;left:13px;top:15px;font-size:12px;font-weight:700;color:var(--muted)}
+.rrow .rf,.rrow .rb{padding:8px 12px;border-radius:12px;color:#1F1B3A;font-size:var(--txt);line-height:1.5;overflow-wrap:anywhere;transition:box-shadow .7s ease}
+.rrow .rf{background:#EEF0FF}.rrow .rb{background:#FFEAF0;margin-top:6px}
+.rrow .on{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--primary) 60%,transparent)}
+.player .ctl{display:flex;justify-content:center;align-items:center;gap:18px;margin:12px 0 0;flex:none}
+.player .ctl .ib{width:52px;height:52px;background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.player .ctl .main{width:68px;height:68px;background:var(--primary);color:#fff}
+.player .ctl button:disabled{opacity:.3}
+.lab{display:inline-block;font:800 11px system-ui;letter-spacing:.08em;padding:4px 10px;border-radius:999px;background:#6C4DF626;color:#5A3DE0;margin-bottom:10px}
+.lab.pink{background:#F0386B22;color:#C42157}.lab.amber{background:#FFB02033;color:#9A5B00}
+
+/* card editor: full screen, formatting bar docked above the keyboard */
+.edit{position:fixed;left:0;top:0;width:100%;background:var(--bg);z-index:10}
+.edit .in{height:100%;max-width:760px;margin:0 auto;display:flex;flex-direction:column;padding:0 12px}
+.edit .bar{margin:0 -12px;padding-left:8px;padding-right:12px}
+.edit .save{background:var(--primary);color:#fff;min-height:42px;padding:0 18px}
+.fields{flex:1;min-height:0;overflow-y:auto;padding:2px 0 16px;overscroll-behavior:contain}
+.fld{display:flex;flex-direction:column;height:var(--fh,220px);min-height:110px;margin-bottom:12px}
+.flab{flex:none;min-height:34px;display:flex;align-items:center;gap:8px;margin:0 4px 6px;font-size:13px;font-weight:800;color:var(--muted)}
+.flab span{flex:1;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.flab span::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c)}
+.grip{flex:none;height:20px;display:flex;align-items:center;justify-content:center;cursor:ns-resize;touch-action:none}
+.grip::after{content:"";width:48px;height:5px;border-radius:99px;background:color-mix(in srgb,var(--ink) 22%,transparent)}
+.ed{flex:1;min-height:0;overflow-y:auto;background:#fff;color:#1F1B3A;border-radius:20px;padding:18px;font-size:var(--txt);line-height:1.5;
+  box-shadow:var(--shadow);outline:0;border:2px solid transparent;overflow-wrap:anywhere}
+.ed:focus{border-color:color-mix(in srgb,var(--primary) 55%,transparent)}
+.ed:empty::before{content:attr(data-ph);color:#1F1B3A66}
+.chips{flex:1;min-width:0;max-width:64%;margin:0}
+.chips select{width:100%;min-width:0;height:34px;padding:0 8px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);
+  color:var(--ink);font:inherit;font-size:14px;font-weight:700;text-overflow:ellipsis}
+.edit .in{position:relative}
+/* formatting bar: icon-only buttons in the style of a notes app */
+.tb{display:flex;gap:2px;align-items:center;overflow-x:auto;scrollbar-width:none;flex:none;margin:10px -12px 0;
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--line)}
+.tb::-webkit-scrollbar{display:none}
+.tb button{min-width:48px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:21px;line-height:1;color:var(--ink);flex:none}
+.tb button:active,.tb button.open{background:color-mix(in srgb,var(--ink) 13%,transparent)}
+.tb svg.i{width:26px;height:26px;stroke-width:1.7}
+.tb .bar{fill:var(--bar,currentColor);stroke:none}
+.tb b{font-weight:800}.tb i{font-style:italic;font-family:Georgia,"Times New Roman",serif;font-weight:500}
+.tb u{text-underline-offset:4px;text-decoration-thickness:2px}.tb sub{font-size:.5em}
+.tb .sz{display:flex;align-items:center;gap:4px;min-width:60px;padding:0 8px;font-size:19px;font-weight:500}
+.tb .caret{border:5px solid transparent;border-top:6px solid currentColor;border-bottom:0}
+/* the small menu above the bar: colours, size, "add a colour" */
+.cmenu{position:absolute;left:4px;right:4px;bottom:calc(66px + env(safe-area-inset-bottom));z-index:30;background:var(--surface);color:var(--ink);
+  border-radius:26px;box-shadow:0 12px 40px rgba(0,0,0,.35);padding:10px 14px 16px;animation:up .18s ease-out}
+.cmh{display:flex;align-items:center;gap:2px;margin-bottom:6px}.cmh b{flex:1;font-size:16px;margin-left:4px}
+.pages{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.pages::-webkit-scrollbar{display:none}
+.page{flex:0 0 100%;scroll-snap-align:start;display:grid;grid-template-columns:repeat(8,1fr);justify-items:center;padding:6px 0}
+.swc{width:34px;height:34px;border-radius:50%;border:2px solid color-mix(in srgb,var(--ink) 20%,transparent)}
+.swc.on{outline:3px solid var(--primary);outline-offset:2px}
+.dots{display:flex;justify-content:center;gap:8px;margin-top:12px}
+.dots i{width:7px;height:7px;border-radius:50%;background:color-mix(in srgb,var(--ink) 25%,transparent)}.dots i.on{background:var(--ink)}
+.addrow{display:flex;align-items:center;gap:10px;margin-top:8px}
+.addrow .prev{width:44px;height:44px;border-radius:14px;flex:none;border:2px solid var(--line)}
+.addrow input{flex:1;min-width:0;height:48px;font:inherit;font-size:18px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);outline:0}
+.addrow input:focus{border-color:var(--primary)}
+.szrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.szrow button{min-width:56px;height:46px;border-radius:14px;background:color-mix(in srgb,var(--ink) 8%,transparent);font-weight:700;font-size:17px}
+.szrow button.on{background:var(--primary);color:#fff}
+
+/* practice: full-screen feed */
+.reel-top{position:fixed;top:0;left:0;right:0;max-width:520px;margin:0 auto;z-index:20;display:flex;align-items:center;gap:10px;
+  padding:calc(10px + env(safe-area-inset-top)) 12px 10px;pointer-events:none}
+.reel-top>*{pointer-events:auto}
+.glass{background:#FFFFFFCC;color:#1F1B3A;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.reel-top .ib{width:42px;height:42px}
+.reel-top .prog{flex:1;height:8px;border-radius:99px;background:#1F1B3A22;overflow:hidden;pointer-events:none}
+.reel-top .prog i{display:block;height:100%;width:0;background:var(--primary);border-radius:99px;transition:width .35s}
+.reel-top b{border-radius:99px;padding:7px 12px;font-size:13px;white-space:nowrap}
+.reel{position:fixed;top:0;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;z-index:10;overflow-y:scroll;scroll-snap-type:y mandatory;
+  overscroll-behavior:contain;outline:0;background:var(--bg);scrollbar-width:none}
+.reel::-webkit-scrollbar{display:none}
+.slide{height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;display:flex;flex-direction:column;justify-content:center;
+  padding:76px 84px 80px 24px;background:linear-gradient(180deg,#F3F2FF,#E2E0FF);color:#1F1B3A;text-align:left;overflow:hidden}
+.slide.flipped{background:linear-gradient(180deg,#FFF3F6,#FFDDE7)}
+.slide.done{background:var(--bg);color:var(--ink);padding-right:24px}
+.slide[data-a=flip]{cursor:pointer;-webkit-user-select:none;user-select:none} /* the whole screen flips the card */
+.slide .card{max-height:100%;overflow-y:auto;font-size:var(--txt);line-height:1.5;overflow-wrap:anywhere}
+.slide.done .card{font-size:16px}
+.slide.done .card{text-align:center}
+.slide .inf{font-size:var(--txt)}
+.slide hr{border:0;border-top:1px solid #1F1B3A22;margin:18px 0 12px}
+.slide .back,.slide.flipped .front{display:none}.slide.flipped .back{display:block}
+.slide .card .front{text-align:center}
+.slide:not(.done){padding-left:84px} /* same margin both sides, so the card is centred on the screen */
+/* back: the container is centred on the screen (it is only as wide as its text), the text inside stays left-aligned */
+.slide.flipped .card{width:fit-content;max-width:100%;margin:0 auto;text-align:left}
+.slide .tap{position:absolute;right:24px;text-align:right;bottom:calc(28px + env(safe-area-inset-bottom));font-size:13px;font-weight:700;color:#1F1B3A88}
+.swipe{position:absolute;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom));text-align:center;font-size:13px;font-weight:700;color:#1F1B3A99;
+  animation:bob 1.4s ease-in-out 3}
+@keyframes bob{50%{transform:translateY(-8px)}}
+/* "I know this one": just an outline heart, quiet until it is switched on */
+.slide .rail{position:absolute;right:10px;bottom:calc(56px + env(safe-area-inset-bottom));width:76px;display:flex;flex-direction:column;align-items:center}
+.know{width:76px;padding:10px 0;display:flex;flex-direction:column;align-items:center;color:#1F1B3A8C}
+/* archive icon (extra information) and its speech bubble */
+.arch{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;color:#1F1B3A8C}
+.arch svg{width:26px;height:26px;stroke-width:1.5}
+.arch.none,.slide:not(.flipped) .arch{visibility:hidden}
+.slide.info .arch{color:var(--primary)}
+.bubble{display:none;position:absolute;right:88px;bottom:calc(60px + env(safe-area-inset-bottom));max-width:min(270px,calc(100% - 118px));
+  background:#fff;color:#1F1B3A;border-radius:18px;padding:12px 14px;box-shadow:0 8px 28px rgba(31,27,58,.25);text-align:left;font-size:var(--txt);line-height:1.5;cursor:default}
+.bubble::after{content:"";position:absolute;right:-7px;bottom:12px;width:16px;height:16px;background:#fff;transform:rotate(45deg);border-radius:3px}
+.bubble .inf{position:relative;z-index:1;max-height:42vh;overflow-y:auto;overflow-wrap:anywhere;font-size:var(--txt)}
+.slide.info.flipped .bubble{display:block;animation:bub .18s ease-out}
+@keyframes bub{from{opacity:0;transform:translateX(8px)}}
+.know svg{width:30px;height:30px;stroke-width:1.5;transition:transform .15s}
+.know:active svg{transform:scale(.85)}
+.know em{font-style:normal;font-size:11px;font-weight:600;line-height:1.2;margin-top:4px;text-align:center}
+.know.on{color:var(--heart)}
+.know.on svg{animation:pop .32s}
+@keyframes pop{0%{transform:scale(.5)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
 </style>
 </head>
 <body>
@@ -48,31 +242,66 @@ import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged} from "htt
 import {initializeFirestore,persistentLocalCache,collection,doc,setDoc,deleteDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {firebaseConfig} from "./config.js";
 
-// ---- data: Firestore, one document per deck / card, private to the signed-in user -------------
+// ---- data: Firestore, one document per deck / card / source / backup, private to the signed-in user --------
 const fb = initializeApp(firebaseConfig), auth = getAuth(fb);
 const db = initializeFirestore(fb, {localCache: persistentLocalCache()});
-let uid, decks = [], cards = [];
+let uid, decks = [], cards = [], backups = [], sources = [];
+const LISTS = ['decks', 'cards', 'backups', 'sources'];
 const col = n => collection(db, 'users', uid, n);
-const save = (n, o) => setDoc(doc(col(n), o.id), o);
-const del = (n, id) => deleteDoc(doc(col(n), id));
 const byT = (a, b) => a.t - b.t;
 const cardsOf = id => cards.filter(c => c.deckId == id);
+const setList = (n, list) => { // new data for one list, from Firestore or from test mode
+  if (n == 'decks') decks = list.sort(byT);
+  else if (n == 'cards') cards = list.sort(byT);
+  else if (n == 'sources') {
+    sources = list.sort(byT);
+    const el = $('.chips'); // the card editor is never re-rendered, so refresh just the source chips
+    if (el) el.outerHTML = chips();
+    return;
+  } else backups = list.sort((a, b) => b.t - a.t);
+  live();
+};
+// Test mode (localhost only): skips the login and keeps data in this browser instead of Firebase.
+const LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
+let test = false, mem;
+const local = (n, f) => {
+  mem[n] = f(mem[n] || []); localStorage.fcTest = JSON.stringify(mem); setList(n, [...mem[n]]);
+  return Promise.resolve();
+};
+const save = (n, o) => test ? local(n, m => m.filter(x => x.id != o.id).concat(o)) : setDoc(doc(col(n), o.id), o);
+const del = (n, id) => test ? local(n, m => m.filter(x => x.id != id)) : deleteDoc(doc(col(n), id));
+function enterTest() {
+  const t = Date.now();
+  test = true; uid = 'test'; sessionStorage.fcTest = 1;
+  mem = JSON.parse(localStorage.fcTest || 'null') || {
+    decks: [{id: 'd1', title: 'Sample deck', t}],
+    cards: [{id: 'c1', deckId: 'd1', front: '<b>Capital of Sweden?</b>', back: 'Stockholm', info: 'Test data', included: true, t},
+      {id: 'c2', deckId: 'd1', front: '2 + 2', back: '4', info: '', included: true, t: t + 1}],
+    backups: [],
+  };
+  LISTS.forEach(n => { mem[n] = mem[n] || []; setList(n, [...mem[n]]); });
+  render();
+}
 onAuthStateChanged(auth, u => {
+  if (test) return;
   uid = u ? u.uid : null;
   if (!u) return render();
-  onSnapshot(col('decks'), s => { decks = s.docs.map(d => d.data()).sort(byT); live(); });
-  onSnapshot(col('cards'), s => { cards = s.docs.map(d => d.data()).sort(byT); live(); });
+  LISTS.forEach(n => onSnapshot(col(n), s => setList(n, s.docs.map(d => d.data()))));
 });
 
 // ---- helpers ---------------------------------------------------------------------------------
 const $ = s => document.querySelector(s), app = $('#app');
-const COL = ['#FF6B6B', '#4D96FF', '#3FBF6A', '#9B5DE5', '#F15BB5', '#FF9F1C'];
+const GRAD = [['#6C4DF6', '#9B7BFF'], ['#F0386B', '#FF8FA8'], ['#12A594', '#5EDBC0'], ['#F08A00', '#FFC247'], ['#2F7BF5', '#6DB4FF'], ['#C13FE0', '#F29BFF']];
+const grad = i => `linear-gradient(135deg,${GRAD[i % 6][0]},${GRAD[i % 6][1]})`;
 const EMO = ['🦄', '🌈', '🍉', '🚀', '🎨', '🐳', '🍭', '🦊', '🌻', '🎈'];
-const esc = s => s.replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
 const plain = h => { const d = document.createElement('div'); d.innerHTML = h || ''; return d.textContent.trim(); };
-const shuf = a => a.sort(() => Math.random() - .5);
+const shuf = a => { // Fisher-Yates: every order is equally likely (sorting with a random comparator is not)
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+};
 
-// Cards saved by the Android app store text as {"t":..,"s":[spans]}; turn that into HTML on restore.
+// Cards saved by the Android app store text as {"t":..,"s":[spans]}; turn that into HTML on import.
 const hex = v => '#' + ((v >>> 0) & 0xFFFFFF).toString(16).padStart(6, '0');
 const CSS = {BOLD: 'font-weight:bold', ITALIC: 'font-style:italic', UNDERLINE: 'text-decoration:underline'};
 function conv(s) {
@@ -90,84 +319,301 @@ function conv(s) {
   }).join('');
 }
 
-// ---- views -----------------------------------------------------------------------------------
-let run;
-const head = (title, to = "home", id = '') => `<header><button data-a="${to}" data-i="${id}">←</button><h1>${esc(title)}</h1></header>`;
+// Icons (24px stroke icons)
+const P = {
+  back: '<polyline points="15 18 9 12 15 6"/>',
+  plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  edit: '<path d="M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5z"/>',
+  trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/>',
+  check: '<polyline points="20 6 9 17 4 12"/>',
+  x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>',
+  heartf: '<path fill="currentColor" d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>',
+  undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  redo: '<path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>',
+  // text-editing icons in the style of a notes app; .bar is the little colour strip under the T
+  tcolor: '<path d="M6 4h12M12 4v13"/><rect class="bar" x="4" y="19.2" width="16" height="2.6" rx="1.3"/>',
+  hcolor: '<rect x="3.5" y="2.5" width="17" height="15" rx="3.5"/><path d="M8.5 7.5h7M12 7.5v6.5"/><rect class="bar" x="4" y="19.2" width="16" height="2.6" rx="1.3"/>',
+  strike: '<path d="M6 4h12M12 4v16M4.5 12h15"/>',
+  olist: '<line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/>' +
+    '<text x="2" y="8.3" font-size="6.5" font-weight="700" fill="currentColor" stroke="none">1</text>' +
+    '<text x="2" y="14.3" font-size="6.5" font-weight="700" fill="currentColor" stroke="none">2</text>' +
+    '<text x="2" y="20.3" font-size="6.5" font-weight="700" fill="currentColor" stroke="none">3</text>',
+  list: '<line x1="9" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="9" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>',
+  play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+  stop: '<rect x="6" y="6" width="12" height="12" rx="2"/>',
+  prev: '<polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/>',
+  next: '<polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>',
+  volume: '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>',
+  search: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+  archive: '<polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5" rx="1.5"/><line x1="10" y1="12" x2="14" y2="12"/>',
+};
+const I = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
 
-function decksView() {
-  return `<header><h1>My Decks 🎈</h1></header>
-  <div class="row bar"><button data-a="backup">💾 Backup</button>
-  <label class="btn">📂 Restore<input type="file" accept=".json" data-a="restore" hidden></label></div>` +
-  (decks.map((d, i) => `<div class="tile" style="background:${COL[i % 6]}" data-a="open" data-i="${d.id}">
-    <span class="em">${EMO[i % 10]}</span>
-    <div><b>${esc(d.title)}</b><br>${cardsOf(d.id).length} cards</div>
-    <button data-a="ren" data-i="${d.id}">✏️</button><button data-a="deldeck" data-i="${d.id}">🗑</button></div>`).join('')
-    || '<p class="c">No decks yet!<br>Tap “New deck” to make your first one. 🌟</p>') +
-  `<button class="fab" data-a="newdeck">＋ New deck</button>`;
+// In-app dialogs and toasts (instead of the browser's prompt / confirm / alert)
+function dialog(html) {
+  return new Promise(res => {
+    const s = document.createElement('div'); s.className = 'scrim';
+    s.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
+    document.body.append(s);
+    const inp = s.querySelector('input');
+    const end = v => { s.remove(); removeEventListener('keydown', key); res(v); };
+    const ok = () => end(inp ? inp.value : true);
+    const key = e => { if (e.key == 'Escape') end(null); else if (e.key == 'Enter' && inp && document.activeElement == inp) ok(); };
+    addEventListener('keydown', key);
+    s.onclick = e => { if (e.target == s || e.target.closest('[data-x="0"]')) end(null); else if (e.target.closest('[data-x="1"]')) ok(); };
+    (inp || s.querySelector('[data-x="1"]')).focus();
+    if (inp) inp.select();
+  });
+}
+const ask = (title, value = '', ph = '') => dialog(`<h2>${esc(title)}</h2><input type="text" value="${esc(value)}" placeholder="${esc(ph)}" maxlength="200">
+  <div class="actions"><button class="btn ghost" data-x="0">Cancel</button><button class="btn" data-x="1">Save</button></div>`);
+const sure = (title, text, okLabel = 'Delete') => dialog(`<h2>${esc(title)}</h2><p>${esc(text)}</p>
+  <div class="actions"><button class="btn ghost" data-x="0">Cancel</button><button class="btn ${okLabel == 'Delete' ? 'danger' : ''}" data-x="1">${esc(okLabel)}</button></div>`);
+let toastTimer;
+function toast(msg, label, fn) {
+  let t = $('#toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; document.body.append(t); }
+  t.innerHTML = `<span>${esc(msg)}</span>${label ? `<button>${esc(label)}</button>` : ''}`;
+  t.className = 'show';
+  if (label) t.querySelector('button').onclick = () => { t.className = ''; fn(); };
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = '', 6000);
+}
+
+// ---- views -----------------------------------------------------------------------------------
+let run, base;
+const bar = (title, back, right = '') => `<div class="bar">${back ? `<button class="ib" data-a="${back[0]}" data-i="${back[1] || ''}" aria-label="Back">${I('back')}</button>` : ''}
+  <h1>${esc(title)}</h1>${right}</div>`;
+const plural = (n, w) => `${n} ${w}${n == 1 ? '' : 's'}`;
+
+function homeView() {
+  const backupRow = b => `<div class="row2"><div class="txt"><b>${esc(b.name || new Date(b.t).toLocaleString())}</b>
+    <span>${new Date(b.t).toLocaleString()} · ${plural(b.nd, 'deck')} · ${plural(b.nc, 'card')}</span></div>
+    <button class="ib" data-a="renb" data-i="${b.id}" aria-label="Rename backup">${I('edit')}</button>
+    <button class="ib" data-a="restoreb" data-i="${b.id}" aria-label="Restore backup">${I('undo')}</button>
+    <button class="ib" data-a="delb" data-i="${b.id}" aria-label="Delete backup">${I('trash')}</button></div>`;
+  return `<div class="hero-t"><img class="logo" src="icon-192.png" alt=""><div><h1>Sara's Flashcards</h1>
+    <p>${plural(decks.length, 'deck')} · ${plural(cards.length, 'card')}</p></div></div>` +
+    (decks.length ? `<div class="grid">${decks.map((d, i) => `<div class="deck" style="background:${grad(i)}" data-a="open" data-i="${d.id}" role="button" tabindex="0">
+        <div class="acts"><button data-a="ren" data-i="${d.id}" aria-label="Rename deck">${I('edit')}</button>
+        <button data-a="deldeck" data-i="${d.id}" aria-label="Delete deck">${I('trash')}</button></div>
+        <div class="em">${EMO[i % 10]}</div>
+        <div><h3>${esc(d.title)}</h3><small>${plural(cardsOf(d.id).length, 'card')}</small></div></div>`).join('')}</div>`
+    : `<div class="empty"><div class="big">🌟</div><h2>No decks yet</h2><p>Create your first deck, then add flashcards to it.</p>
+        <button class="btn" data-a="newdeck">${I('plus')}New deck</button></div>`) +
+    `<div class="sec">Backups</div><div class="list">${backups.map(backupRow).join('') || '<div class="row2"><div class="txt"><span>No backups yet.</span></div></div>'}</div>
+    <div class="row" style="margin-top:12px"><button class="btn soft" data-a="backup">${I('download')}Back up now</button>
+    <label class="btn ghost" role="button">${I('upload')}Import file<input type="file" accept=".json" data-a="restore" hidden></label></div>` +
+    (decks.length ? `<button class="fab" data-a="newdeck">${I('plus')}New deck</button>` : '');
+}
+
+// Read-aloud voice picker: voices grouped by language (your own language first), with tidied-up names.
+const langName = c => { try { return new Intl.DisplayNames([navigator.language], {type: 'language'}).of(c); } catch { return c; } };
+function voicePicker(id) {
+  const mine = navigator.language.split('-')[0], groups = {};
+  speechSynthesis.getVoices().forEach(v => (groups[v.lang] = groups[v.lang] || []).push(v));
+  const langs = Object.keys(groups).sort((a, b) => (b.startsWith(mine) - a.startsWith(mine)) || langName(a).localeCompare(langName(b)));
+  return `<div class="voice">${I('volume')}<select data-a="voice" data-i="${id}" aria-label="Read-aloud voice and language">
+    <option value="">Default voice on this device</option>` + langs.map(l => `<optgroup label="${esc(langName(l))}">` +
+      groups[l].map(v => `<option value="${esc(v.name)}" ${v.name == localStorage.voice ? 'selected' : ''}>${
+        esc(v.name.replace(/^(Microsoft|Google)\s+/, '').replace(/\s+-\s+.*$/, ''))} · ${v.lang}</option>`).join('') + '</optgroup>').join('') +
+    `</select></div>`;
 }
 
 function deckView(id) {
-  const d = decks.find(x => x.id == id); if (!d) return decksView();
-  const cs = cardsOf(id), n = cs.filter(c => c.included).length;
-  return head(d.title) + `<div class="row"><button class="mint" data-a="run" data-i="${id}" ${n ? '' : 'disabled'}>▶ Start run</button>
-    <button class="sky" data-a="read" data-i="${id}">🔊 Read aloud</button></div>
-    <p><b>${n} of ${cs.length} cards are in the run</b></p>` +
-  cs.map((c, i) => `<div class="crow" style="border-color:${COL[i % 6]}">
-    <input type="checkbox" data-a="inc" data-i="${c.id}" ${c.included ? 'checked' : ''}>
-    <div data-a="edit" data-i="${c.id}"><b>${esc(plain(c.front) || '(empty front)')}</b><br>${esc(plain(c.back) || '(empty back)')}</div>
-    <button data-a="delcard" data-i="${c.id}">🗑</button></div>`).join('') +
-  `<button class="fab" data-a="newcard" data-i="${id}">＋ Add flashcard</button>`;
+  const di = decks.findIndex(x => x.id == id); if (di < 0) return homeView();
+  const d = decks[di], cs = cardsOf(id), n = cs.filter(c => c.included).length;
+  const row = c => `<div class="row2 crow" data-s="${esc((plain(c.front) + ' ' + plain(c.back)).toLowerCase())}">
+    <input type="checkbox" class="sw" data-a="inc" data-i="${c.id}" ${c.included ? 'checked' : ''} aria-label="Include in practice">
+    <div class="txt" data-a="edit" data-i="${c.id}" role="button" tabindex="0"><b>${esc(plain(c.front) || '(empty front)')}</b><span>${esc(plain(c.back) || '(empty back)')}</span></div>
+    <button class="ib" data-a="delcard" data-i="${c.id}" aria-label="Delete card">${I('trash')}</button></div>`;
+  return bar(d.title, ['home'], `<button class="ib" data-a="ren" data-i="${id}" aria-label="Rename deck">${I('edit')}</button>`) +
+    `<div class="dhero" style="background:${grad(di)}"><div class="stat">${plural(cs.length, 'card')} · ${n} in practice</div>
+      <div class="btns"><button class="btn p" style="color:${GRAD[di % 6][0]}" data-a="run" data-i="${id}" ${n ? '' : 'disabled'}>${I('play')}Practice</button>
+      <button class="btn t" data-a="read" data-i="${id}" ${cs.length ? '' : 'disabled'}>${I('volume')}Read aloud</button></div></div>` +
+    voicePicker(id) +
+    (cs.length > 5 ? `<div class="search">${I('search')}<input id="q" type="search" placeholder="Search cards" autocomplete="off" aria-label="Search cards"></div>` : '') +
+    (cs.length ? `<div class="list" style="margin-top:12px">${cs.map(row).join('')}</div>`
+      : `<div class="empty"><div class="big">📝</div><h2>This deck is empty</h2><p>Add your first flashcard.</p></div>`) +
+    `<button class="fab" data-a="newcard" data-i="${id}">${I('plus')}Add card</button>`;
 }
 
-const T = ['#2D2A4A', '#E63946', '#FF8C00', '#2BA84A', '#1E88E5', '#8E24AA', '#EC407A'], H = ['#FFF176', '#A5D6A7', '#81D4FA', '#F8BBD0', '#FFCC80'];
-const btn = (c, l, v = '') => `<button data-a="fmt" data-c="${c}" data-v="${v}">${l}</button>`;
-const sw = (c, v) => `<button class="sw" data-a="fmt" data-c="${c}" data-v="${v}" style="background:${v}"></button>`;
-const TB = `<div class="tb">${btn('bold', '<b>B</b>')}${btn('italic', '<i>I</i>')}${btn('underline', '<u>U</u>')}${btn('insertUnorderedList', '•≡')}
-  ${btn('fontSize', 'A−', 2)}${btn('fontSize', 'A', 3)}${btn('fontSize', 'A+', 5)}${btn('fontSize', 'A++', 6)}
-  ${T.map(v => sw('foreColor', v)).join('')}${H.map(v => sw('hiliteColor', v)).join('')}${btn('removeFormat', '✕')}</div>`;
-const section = (id, label, color, html) => `<h3 style="background:${color}">${label}</h3>${TB}<div class="ed" id="${id}" style="border-color:${color}" contenteditable>${html || ''}</div>`;
+// Card editor, laid out like a notes app: top bar, one big writing area, and a one-line formatting bar
+// docked above the keyboard. The bar is shared by Front / Back / General info (the tabs switch between them).
+const tbtn = (c, inner, title) => `<button data-a="fmt" data-c="${c}" title="${title}" aria-label="${title}">${inner}</button>`;
+// Text colour / highlight / size: tap the icon to open a small menu. The colour menus list colours (preset + your own);
+// the multicoloured swatch opens "Add a colour", where a hex code can be added to the list. Choices are remembered.
+let pen = {foreColor: '#1F1B3A', hiliteColor: '#FFF176'}, cust = {foreColor: [], hiliteColor: []}, size = 12; // 12 = the standard text size (--txt in the styles)
+try { pen = {...pen, ...JSON.parse(localStorage.pen)}; cust = {...cust, ...JSON.parse(localStorage.cust)}; } catch {}
+const PRESETS = {
+  foreColor: ['#1F1B3A', '#E63946', '#F08A00', '#E0B000', '#2BA84A', '#2F7BF5', '#7B4DF6', '#6B7280'],
+  hiliteColor: ['#FFF176', '#FFD180', '#FFAB91', '#F8BBD0', '#E1BEE7', '#BBDEFB', '#B2EBF2', '#C8E6C9'],
+};
+const SIZES = [12, 14, 16, 18, 20, 24, 28, 36];
+const normHex = v => {
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(v).trim());
+  return m ? '#' + (m[1].length == 3 ? m[1].replace(/./g, '$&$&') : m[1]).toLowerCase() : null;
+};
+const setPen = (c, v) => {
+  pen[c] = v;
+  try { localStorage.pen = JSON.stringify(pen); } catch {}
+  document.querySelectorAll(`.tb [data-i="${c}"]`).forEach(e => e.style.setProperty('--bar', v)); // the strip under the T
+};
+const SWATCH = '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">' + ['#E63946', '#F08A00', '#F5C400', '#2BA84A', '#2F7BF5', '#7B4DF6']
+  .map((c, i) => `<circle cx="${5 + (i % 3) * 7}" cy="${8 + (i < 3 ? 0 : 8)}" r="3" fill="${c}"/>`).join('') + '</svg>';
+const TB = `<div class="tb">
+  <button data-a="cmopen" data-i="foreColor" style="--bar:${pen.foreColor}" title="Text colour" aria-label="Text colour">${I('tcolor')}</button>
+  <button data-a="cmopen" data-i="hiliteColor" style="--bar:${pen.hiliteColor}" title="Highlight colour" aria-label="Highlight colour">${I('hcolor')}</button>
+  <button class="sz" data-a="cmopen" data-i="size" title="Text size" aria-label="Text size"><span id="szl">${size}</span><span class="caret"></span></button>
+  ${tbtn('undo', I('undo'), 'Undo')}${tbtn('redo', I('redo'), 'Redo')}
+  ${tbtn('bold', '<b>B</b>', 'Bold')}${tbtn('italic', '<i>I</i>', 'Italic')}${tbtn('underline', '<u>U</u>', 'Underline')}${tbtn('strikeThrough', I('strike'), 'Strikethrough')}
+  ${tbtn('insertOrderedList', I('olist'), 'Numbered list')}${tbtn('insertUnorderedList', I('list'), 'Bullet list')}
+  ${tbtn('removeFormat', 'T<sub>x</sub>', 'Clear formatting')}</div>`;
+// The little menu above the toolbar: cmS = {m: 'foreColor' | 'hiliteColor' | 'size', view: 'pick' | 'add'}
+let cmS = null;
+const MTITLE = {foreColor: 'Text colour', hiliteColor: 'Highlight colour', size: 'Text size'};
+const closeBtn = `<button class="ib" data-a="cmclose" aria-label="Close">${I('x')}</button>`;
+function menuHtml() {
+  const {m, view} = cmS;
+  if (m == 'size') return `<div class="cmh"><b>${MTITLE.size}</b>${closeBtn}</div>
+    <div class="szrow">${SIZES.map(s => `<button class="${s == size ? 'on' : ''}" data-a="setsize" data-i="${s}">${s}</button>`).join('')}</div>`;
+  if (view == 'add') return `<div class="cmh"><b>Add a colour</b>${closeBtn}</div>
+    <div class="addrow"><span class="prev" id="hxp" style="background:${pen[m]}"></span>
+    <input id="hx" type="text" maxlength="7" placeholder="#RRGGBB" autocomplete="off" aria-label="Hex colour">
+    <button class="btn" data-a="cmadd">Add</button></div>`;
+  const all = [...PRESETS[m], ...cust[m]], pages = [];
+  for (let i = 0; i < all.length; i += 8) pages.push(all.slice(i, i + 8));
+  return `<div class="cmh"><b>${MTITLE[m]}</b><button class="ib" data-a="cmadv" aria-label="Add a colour" title="Add a colour">${SWATCH}</button>${closeBtn}</div>
+    <div class="pages">${pages.map(p => `<div class="page">${p.map(c => `<button class="swc ${c == pen[m] ? 'on' : ''}" data-a="usec" data-i="${c}"
+      style="background:${c}" aria-label="${c}"></button>`).join('')}</div>`).join('')}</div>
+    ${pages.length > 1 ? `<div class="dots">${pages.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>` : ''}`;
+}
+function drawMenu() {
+  const el = $('#cmenu');
+  if (!el) return;
+  el.hidden = !cmS;
+  if (cmS) el.innerHTML = menuHtml();
+  document.querySelectorAll('.tb [data-a=cmopen]').forEach(b => b.classList.toggle('open', !!cmS && b.dataset.i == cmS.m));
+}
+const closeMenu = () => { cmS = null; drawMenu(); };
+// Text size: the browser only knows 7 sizes, so ask for the biggest and turn it into the exact pixel size.
+function applySize(px) {
+  if (!sel) return;
+  restore(); document.execCommand('fontSize', false, '7');
+  host.querySelectorAll('font[size="7"],[style*="xxx-large"]').forEach(f => { f.removeAttribute('size'); f.style.fontSize = px + 'px'; });
+}
+const FIELDS = [['f', 'Front', '#2F7BF5', 'Front of the card…', 'front'], ['b', 'Back', '#F0386B', 'Back of the card…', 'back'],
+  ['i', 'General info', '#F08A00', 'Extra information, sources…', 'info']];
+// One field: a label row (General info also holds the sources dropdown), the writing area, and a grip to drag it taller or shorter.
+const field = ([k, label, col, ph], html) => `<section class="fld" style="--c:${col}">
+  <div class="flab"><span>${label}</span>${k == 'i' ? chips() : ''}</div>
+  <div class="ed" id="${k}" data-ph="${ph}" contenteditable>${html || ''}</div>
+  <div class="grip" role="separator" aria-label="Drag to resize ${label}"></div></section>`;
+// The saved list of sources, in one dropdown: pick one to add its text to General info; the last two entries
+// add a new source or open the list for removing sources. (The element keeps the class "chips" so it can be refreshed in place.)
+const chips = () => `<div class="chips"><select data-a="srcsel" aria-label="Sources">
+  <option value="">Add a source${sources.length ? ` (${sources.length})` : ''}…</option>
+  ${sources.map(s => `<option value="${s.id}">${esc(s.text)}</option>`).join('')}
+  <option value="+new">＋ New source…</option>${sources.length ? '<option value="+edit">Remove a source…</option>' : ''}</select></div>`;
 
 function editView(deck, id) {
   const c = cards.find(x => x.id == id) || {};
-  return head(id ? 'Edit flashcard ✏️' : 'New flashcard ✨', 'open', deck) +
-    section('f', 'Front 🌟', '#4D96FF', c.front) + section('b', 'Back 🎯', '#F15BB5', c.back) + section('i', 'General info 💡', '#FF9F1C', c.info) +
-    `<p><button class="mint" style="width:100%" data-a="savecard">Save card 💾</button></p>`;
+  return `<div class="edit"><div class="in">
+    <div class="bar"><button class="ib" data-a="leave" data-i="${deck}" aria-label="Back">${I('back')}</button><h1>${id ? 'Edit card' : 'New card'}</h1>
+    <button class="btn save" data-a="savecard">${I('check')}Save</button></div>
+    <div class="fields">${FIELDS.map(f => field(f, c[f[4]])).join('')}</div>
+    <div id="cmenu" class="cmenu" hidden></div>
+    ${TB}</div></div>`;
 }
+const snap = () => ['f', 'b', 'i'].map(k => $('#' + k).innerHTML).join('\u0001');
+// Keep the editor exactly as tall as the visible area, so the formatting bar sits right above the keyboard.
+const fit = () => {
+  const e = $('.edit'), v = window.visualViewport;
+  if (e && v) { e.style.top = v.offsetTop + 'px'; e.style.height = v.height + 'px'; }
+};
+if (window.visualViewport) visualViewport.onresize = visualViewport.onscroll = fit;
 
+// Practice is a full-screen vertical feed: swipe/scroll for the next card, tap a card to flip it, and the one
+// reaction button, "I know this one", takes it out of the rotation. It keeps going until every card is known.
+// The back shows only the answer. Extra information (General info) sits behind the archive icon under the heart,
+// which opens a small speech bubble; the icon is only there on the back, and only when the card has some.
+const slide = (c, first) => {
+  const info = plain(c.info) ? c.info : '';
+  return `<section class="slide" data-id="${c.id}" data-a="flip">
+  <div class="card">
+    <div class="front"><span class="lab">FRONT</span><br>${c.front}</div>
+    <div class="back">${c.back}</div>
+  </div>
+  ${first ? '<div class="tap front">Tap anywhere to flip</div><div class="swipe">Swipe up for the next card ↑</div>' : ''}
+  <div class="rail">
+    <button class="know ${run.known.has(c.id) ? 'on' : ''}" data-a="knowc" data-i="${c.id}" aria-label="I know this one">
+      ${I('heart')}<em>I know this one</em></button>
+    <button class="arch ${info ? '' : 'none'}" data-a="info" ${info ? '' : 'disabled'} aria-label="Show extra information">${I('archive')}</button>
+  </div>
+  ${info ? `<div class="bubble" data-a="keep"><div class="inf">${info}</div></div>` : ''}</section>`;
+};
+function round() { // the next shuffled round of cards that aren't known yet, or the finish screen
+  const left = shuf(run.all.filter(c => !run.known.has(c.id)));
+  if (!left.length) return `<section class="slide done"><div class="card"><div style="font-size:84px">🎉</div><h1>You know all the cards!</h1>
+    <p style="margin:24px 0 12px"><button class="btn" style="width:100%" data-a="again">Study again</button></p>
+    <p><button class="btn ghost" style="width:100%" data-a="open" data-i="${run.deck}">Back to deck</button></p></div></section>`;
+  if (left.length > 1 && left[0].id == run.last) left.push(left.shift()); // don't show the same card twice in a row
+  run.last = left[left.length - 1].id;
+  return left.map((c, i) => slide(c, !run.hinted && i == 0 && (run.hinted = true))).join('');
+}
+function reelScroll() { // endless: add another round when the end is within a couple of screens
+  const r = $('#reel');
+  if (r && !r.querySelector('.done') && r.scrollTop + r.clientHeight * 2.5 >= r.scrollHeight) r.insertAdjacentHTML('beforeend', round());
+}
+const updLeft = () => {
+  const e = $('#left'), p = $('#pbar');
+  if (e) e.textContent = `${run.known.size} / ${run.all.length} known`;
+  if (p) p.style.width = (run.known.size / run.all.length * 100) + '%';
+};
 function runView(id) {
-  if (!run || run.deck != id) { run = {deck: id, pool: shuf(cardsOf(id).filter(c => c.included)), i: 0, flip: 0}; run.total = run.pool.length; }
-  const p = run.pool, c = p[run.i];
-  if (!c) return `<div class="c"><div style="font-size:96px">🎉</div><h1>${run.total ? 'You know all the cards!' : 'No cards are ticked for the run'}</h1>
-    ${run.total ? '<p><button class="grape" style="width:100%" data-a="again">Study again 🔁</button></p>' : ''}
-    <p><button class="sky" style="width:100%" data-a="open" data-i="${id}">Back to deck</button></p></div>`;
-  const info = run.flip && plain(c.info) ? `<hr><small>💡 Good to know</small><div style="font-size:16px">${c.info}</div>` : '';
-  return head('Study time 🚀', 'open', id) +
-    `<progress style="width:100%" value="${run.total - p.length}" max="${run.total}"></progress><b> ${p.length} left to learn</b>
-    <div class="face ${run.flip ? 'b' : ''}" data-a="flip"><small>${run.flip ? 'BACK' : 'FRONT'}</small>${run.flip ? c.back : c.front}${info}
-    ${run.flip ? '' : '<small style="margin-top:12px">tap to flip 👆</small>'}</div>
-    <div class="row"><button class="sun" data-a="next">Next ➡</button><button class="mint" data-a="know">I know this ✓</button></div>`;
+  if (!run || run.deck != id) run = {deck: id, all: cardsOf(id).filter(c => c.included), known: new Set()};
+  if (!run.all.length) return bar('Practice', ['open', id]) + `<div class="empty"><div class="big">🤔</div><h2>No cards in practice</h2><p>Switch on at least one card in the deck.</p></div>`;
+  return `<div class="reel-top"><button class="ib glass" data-a="open" data-i="${id}" aria-label="Back to deck">${I('back')}</button>
+    <div class="prog"><i id="pbar"></i></div><b class="glass" id="left"></b></div>
+    <div class="reel" id="reel" tabindex="0">${round()}</div>`;
 }
 
 function render() {
-  if (uid === undefined) return app.innerHTML = '<p class="c">Loading…</p>';
-  if (!uid) return app.innerHTML = `<div class="c"><h1>Sara's Flashcards 🎈</h1><button class="coral" data-a="login">Sign in with Google</button></div>`;
+  if (uid === undefined) return app.innerHTML = '<div class="empty" style="padding-top:22vh"><img class="logo big" src="icon-192.png" alt=""><p>Loading…</p></div>';
+  if (!uid) return app.innerHTML = `<div class="empty" style="padding-top:22vh"><img class="logo big" src="icon-192.png" alt=""><h1 style="margin:14px 0 4px;font-size:30px">Sara's Flashcards</h1>
+    <p>Sign in to see your decks on every device.</p><button class="btn" data-a="login">Sign in with Google</button>
+    ${LOCAL ? `<p style="margin-top:14px"><button class="btn soft" data-a="test">Test mode (no login)</button></p>` : ''}</div>`;
   const [, r, a, b] = location.hash.split('/');
-  app.innerHTML = ({d: deckView, e: editView, r: runView}[r] || decksView)(a, b);
+  sel = null; cmS = null;
+  document.body.style.overflow = r == 'e' || r == 'r' ? 'hidden' : '';
+  app.innerHTML = (test ? `<div class="testbar">Test mode: data stays in this browser only. <a href="#" data-a="exit">Exit</a></div>` : '') +
+    ({d: deckView, e: editView, r: runView}[r] || homeView)(a, b);
+  if (r == 'e') { // like a notes app: start typing straight away
+    // each field starts at a third of the screen (less the bars), measured now so the keyboard opening doesn't shrink it
+    $('.edit').style.setProperty('--fh', Math.max(150, Math.round((innerHeight - 172) / 3)) + 'px');
+    fit(); base = snap(); $('#f').focus();
+  }
+  if (r == 'r' && $('#reel')) { updLeft(); reelScroll(); $('#reel').onscroll = reelScroll; $('#reel').focus(); }
 }
 // Snapshots re-render the lists only; never while typing a card or studying.
 const live = () => /^#\/[er]\//.test(location.hash) || render();
 
 // ---- read aloud (browser speech synthesis) -----------------------------------------------------
 let R, tok = 0, U;
+const utter = txt => {
+  U = new SpeechSynthesisUtterance(txt); // kept in U so it isn't garbage-collected mid-speech
+  U.voice = speechSynthesis.getVoices().find(v => v.name == localStorage.voice) || null;
+  return U;
+};
 function say(list, i) {
   speechSynthesis.cancel();
   const t = ++tok, c = list[i];
   R = {list, i, part: 0, on: true}; paint();
   const speak = (txt, next) => {
     if (!txt) return next();
-    U = new SpeechSynthesisUtterance(txt);
-    U.voice = speechSynthesis.getVoices().find(v => v.name == localStorage.voice) || null;
-    U.onend = () => t == tok && next();
+    utter(txt).onend = () => t == tok && next();
     speechSynthesis.speak(U);
   };
   const wait = (ms, f) => setTimeout(() => t == tok && f(), ms);
@@ -181,100 +627,264 @@ function say(list, i) {
   step(0);
 }
 function stop() { tok++; speechSynthesis.cancel(); if (R) { R.on = false; paint(); } }
+// The reader is one list of all the cards that is built once and then only updated (nothing is replaced while
+// reading): the card being read gets a soft highlight and the list glides along with it. Fades are slow and
+// gentle, nothing flashes, and with "reduce motion" switched on the list moves without animation.
+let rdI = -1; // the card the list was last scrolled to
 function paint() {
   let o = $('#rd');
-  if (!R) return o && o.remove();
-  if (!o) { o = document.createElement('div'); o.id = 'rd'; document.body.append(o); }
-  const c = R.list[R.i], lang = navigator.language;
-  const vs = speechSynthesis.getVoices().sort((a, b) => (b.lang == lang) - (a.lang == lang) || a.lang.localeCompare(b.lang));
-  o.innerHTML = `<div class="box"><h2>${R.done ? 'All done 🎉' : `Reading card ${R.i + 1} of ${R.list.length}`}</h2>
-    <div class="face sm ${R.part == 1 ? 'on' : ''}"><small>FRONT</small>${c.front}</div>
-    <div class="face b sm ${R.part == 2 ? 'on' : ''}"><small>BACK</small>${c.back}</div>
-    <div class="row"><button data-a="prev" ${R.i ? '' : 'disabled'}>⏮</button>
-    <button class="${R.on ? 'coral' : 'mint'}" data-a="play">${R.on ? '⏹ Stop' : '▶ Play'}</button>
-    <button data-a="next2" ${R.i < R.list.length - 1 ? '' : 'disabled'}>⏭</button></div>
-    <select data-a="voice"><option value="">Default voice</option>${vs.map(v =>
-      `<option value="${esc(v.name)}" ${v.name == localStorage.voice ? 'selected' : ''}>${esc(v.name)} (${v.lang})</option>`).join('')}</select>
-    <button class="sky" style="width:100%" data-a="closerd">Close</button></div>`;
+  if (!R) { rdI = -1; return o && o.remove(); }
+  if (!o) {
+    o = document.createElement('div'); o.id = 'rd'; o.className = 'scrim';
+    o.innerHTML = `<div class="sheet player" role="dialog" aria-label="Read aloud">
+      <div class="phead"><h2 id="rtitle"></h2><button class="ib" data-a="closerd" aria-label="Close">${I('x')}</button></div>
+      <div class="plist" id="rlist">${R.list.map((c, i) => `<div class="rrow" data-a="rjump" data-i="${i}">
+        <span class="rn">${i + 1}</span><div class="rf">${c.front}</div><div class="rb">${c.back}</div></div>`).join('')}</div>
+      <div class="ctl"><button class="ib" data-a="prev" aria-label="Previous card">${I('prev')}</button>
+        <button class="ib main" data-a="play"></button>
+        <button class="ib" data-a="next2" aria-label="Next card">${I('next')}</button></div></div>`;
+    document.body.append(o); rdI = -1;
+  }
+  $('#rtitle').textContent = R.done ? 'All done' : `Reading ${R.i + 1} of ${R.list.length}`;
+  const rows = [...o.querySelectorAll('.rrow')];
+  rows.forEach((r, i) => {
+    r.classList.toggle('cur', i == R.i && !R.done);
+    r.querySelector('.rf').classList.toggle('on', i == R.i && R.part == 1);
+    r.querySelector('.rb').classList.toggle('on', i == R.i && R.part == 2);
+  });
+  const pb = o.querySelector('[data-a=play]'), lab = R.on ? 'Stop' : 'Play';
+  if (pb.getAttribute('aria-label') != lab) { pb.setAttribute('aria-label', lab); pb.innerHTML = I(R.on ? 'stop' : 'play'); }
+  o.querySelector('[data-a=prev]').disabled = !R.i;
+  o.querySelector('[data-a=next2]').disabled = R.i >= R.list.length - 1;
+  if (rdI != R.i) { // glide so the current card sits in the middle of the list
+    const l = $('#rlist'), r = rows[R.i], calm = !matchMedia('(prefers-reduced-motion: reduce)').matches && rdI >= 0;
+    l.scrollTo({top: Math.max(0, r.offsetTop - (l.clientHeight - r.offsetHeight) / 2), behavior: calm ? 'smooth' : 'auto'});
+    rdI = R.i;
+  }
 }
-speechSynthesis.onvoiceschanged = () => R && paint();
+speechSynthesis.onvoiceschanged = () => { if (R) paint(); if (/^#\/d\//.test(location.hash)) render(); }; // voices load late
 
 // ---- actions -----------------------------------------------------------------------------------
+const load = o => { // merge a backup object into the database; returns the number of cards
+  const n = Date.now();
+  o.decks.forEach((d, i) => save('decks', {id: d.id, title: d.title, t: d.t || n + i}));
+  o.cards.forEach((c, i) => save('cards', {id: c.id, deckId: c.deckId, front: conv(c.front), back: conv(c.back),
+    info: conv(c.info), included: c.included !== false, t: c.t || n + i}));
+  (o.sources || []).forEach((s, i) => save('sources', {id: s.id, text: s.text, t: s.t || n + i}));
+  return o.cards.length;
+};
+// Adds text on a new line at the end of General info.
+const addToInfo = text => {
+  const h = $('#i'); h.focus();
+  const r = document.createRange(); r.selectNodeContents(h); r.collapse(false);
+  const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  document.execCommand('insertText', false, (plain(h.innerHTML) ? '\n' : '') + text);
+};
+const named = async (title, value, ph) => { const t = await ask(title, value, ph); return t && t.trim(); };
 const act = {
   login: () => signInWithPopup(auth, new GoogleAuthProvider()),
+  test: () => LOCAL && enterTest(),
+  exit() { delete sessionStorage.fcTest; location.reload(); },
   home: () => location.hash = '',
   open: id => location.hash = '#/d/' + id,
-  newdeck() {
-    const t = prompt('Deck title');
-    if (t && t.trim()) { const id = crypto.randomUUID(); save('decks', {id, title: t.trim(), t: Date.now()}); location.hash = '#/d/' + id; }
+  async newdeck() {
+    const t = await named('New deck', '', 'Deck name');
+    if (t) { const id = crypto.randomUUID(); save('decks', {id, title: t, t: Date.now()}); location.hash = '#/d/' + id; }
   },
-  ren(id) {
-    const d = decks.find(x => x.id == id), t = prompt('Rename deck', d.title);
-    if (t && t.trim()) save('decks', {...d, title: t.trim()});
+  async ren(id) {
+    const d = decks.find(x => x.id == id), t = await named('Rename deck', d.title);
+    if (t) save('decks', {...d, title: t});
   },
-  deldeck(id) {
-    if (confirm('Delete this deck and all its flashcards?')) { cardsOf(id).forEach(c => del('cards', c.id)); del('decks', id); }
+  async deldeck(id) {
+    const d = decks.find(x => x.id == id), cs = cardsOf(id);
+    if (!await sure('Delete this deck?', `"${d.title}" and its ${plural(cs.length, 'card')} will be removed.`)) return;
+    cs.forEach(c => del('cards', c.id)); del('decks', id);
+    toast('Deck deleted', 'Undo', () => { save('decks', d); cs.forEach(c => save('cards', c)); });
   },
   newcard: id => location.hash = `#/e/${id}/`,
   edit: id => location.hash = `#/e/${cards.find(c => c.id == id).deckId}/${id}`,
-  delcard: id => confirm('Delete this flashcard?') && del('cards', id),
+  delcard(id) {
+    const c = cards.find(x => x.id == id);
+    del('cards', id); toast('Card deleted', 'Undo', () => save('cards', c));
+  },
   inc: (id, b) => save('cards', {...cards.find(c => c.id == id), included: b.checked}),
-  fmt: (_, b) => document.execCommand(b.dataset.c, false, b.dataset.v),
+  fmt(v, b) { // undo/redo act on the focused editor as it is; the rest re-select the last selection first
+    if (!/^(undo|redo)$/.test(b.dataset.c)) restore();
+    document.execCommand(b.dataset.c, false, b.dataset.v || v);
+  },
+  cmopen(m) { // a toolbar icon (text colour / highlight / size) opens its menu; tapping it again closes it
+    if (cmS && cmS.m == m) return closeMenu();
+    cmS = {m, view: 'pick'}; drawMenu();
+  },
+  cmclose: () => closeMenu(),
+  cmadv() { cmS.view = 'add'; drawMenu(); $('#hx').focus(); },
+  cmadd() { // adds the typed hex colour to the list in the first menu, then goes back to it
+    const h = normHex($('#hx').value);
+    if (!h) return toast('Use a hex colour like #FF8800');
+    const m = cmS.m;
+    if (![...PRESETS[m], ...cust[m]].includes(h)) { cust[m].push(h); try { localStorage.cust = JSON.stringify(cust); } catch {} }
+    cmS.view = 'pick'; drawMenu();
+    const pg = $('#cmenu .pages'); pg.scrollLeft = pg.scrollWidth;
+    toast(`${h.toUpperCase()} added`);
+  },
+  usec(c) { // a colour in the menu: colour the selected text with it
+    const m = cmS.m;
+    setPen(m, c); restore(); document.execCommand(m, false, c); closeMenu();
+  },
+  setsize(px) {
+    size = +px;
+    $('#szl').textContent = size; applySize(size); closeMenu();
+  },
+  src(id) { const s = sources.find(x => x.id == id); if (s) addToInfo(s.text); },
+  srcsel(v, t) { // the sources dropdown: a source, "+new" or "+edit"
+    t.value = '';
+    if (v == '+new') act.newsrc();
+    else if (v == '+edit') act.managesrc();
+    else if (v) act.src(v);
+  },
+  managesrc() { // a small list for removing sources
+    dialog(`<h2>Your sources</h2><div class="list srclist">${sources.map(s => `<div class="row2"><div class="txt"><b>${esc(s.text)}</b></div>
+      <button class="ib" data-a="delsrc" data-i="${s.id}" aria-label="Remove source">${I('trash')}</button></div>`).join('')}</div>
+      <div class="actions" style="margin-top:16px"><button class="btn" data-x="0">Done</button></div>`);
+  },
+  async newsrc() {
+    const x = await named('New source', '', 'e.g. Biology book, chapter 3');
+    if (!x) return;
+    if (!sources.some(s => s.text == x)) save('sources', {id: crypto.randomUUID(), text: x, t: Date.now()});
+    addToInfo(x);
+  },
+  delsrc(id, b) {
+    const s = sources.find(x => x.id == id), row = b && b.closest('.srclist .row2');
+    del('sources', id); toast('Source removed from the list', 'Undo', () => save('sources', s));
+    if (row) { row.remove(); if (!sources.length || !$('.srclist .row2')) $('.scrim').click(); } // updates the open list
+  },
+  async leave(deck) { // back from the editor, asking first if there are unsaved changes
+    if (snap() == base || await sure('Discard changes?', 'Your edits to this card have not been saved.', 'Discard')) location.hash = '#/d/' + deck;
+  },
   savecard() {
     const [, , deck, id] = location.hash.split('/'), f = $('#f').innerHTML, bk = $('#b').innerHTML;
-    if (!plain(f) && !plain(bk)) return alert('Write something on the front or back first!');
+    if (!plain(f) && !plain(bk)) { $('#f').focus(); return toast('Write something on the front or back first'); }
     const old = cards.find(c => c.id == id);
     save('cards', {id: id || crypto.randomUUID(), deckId: deck, front: f, back: bk, info: $('#i').innerHTML,
       included: old ? old.included : true, t: old ? old.t : Date.now()});
-    location.hash = '#/d/' + deck;
+    base = snap(); location.hash = '#/d/' + deck;
   },
   run: id => { run = null; location.hash = '#/r/' + id; },
   again: () => { run = null; render(); },
-  flip: () => { run.flip ^= 1; render(); },
-  next() { run.i = (run.i + 1) % run.pool.length; if (!run.i) shuf(run.pool); run.flip = 0; render(); },
-  know() {
-    run.pool.splice(run.i, 1);
-    if (run.i >= run.pool.length) { run.i = 0; shuf(run.pool); }
-    run.flip = 0; render();
+  flip(_, b) { const s = b.closest('.slide'); s.classList.toggle('flipped'); s.classList.remove('info'); },
+  info: (_, b) => b.closest('.slide').classList.toggle('info'), // the archive icon: show / hide the speech bubble
+  keep() {}, // taps inside the bubble should not flip the card
+  knowc(id, b) { // "I know this one": toggles; a known card is left out of the following rounds
+    const on = !run.known.has(id);
+    if (on) run.known.add(id); else run.known.delete(id);
+    document.querySelectorAll(`.know[data-i="${id}"]`).forEach(k => k.classList.toggle('on', on));
+    if (on) { // drop its queued copies further down the feed
+      for (let s = b.closest('.slide').nextElementSibling; s;) { const n = s.nextElementSibling; if (s.dataset.id == id) s.remove(); s = n; }
+    }
+    updLeft(); reelScroll();
   },
   read(id) {
     const l = cardsOf(id).filter(c => plain(c.front) || plain(c.back));
     if (l.length) say(l, 0);
   },
+  rjump: i => say(R.list, +i), // tap a card in the reader list to continue from it
   prev: () => say(R.list, R.i - 1),
   next2: () => say(R.list, R.i + 1),
   play: () => R.on ? stop() : say(R.list, R.done ? 0 : R.i),
-  voice(v) { localStorage.voice = v; if (R.on) say(R.list, R.i); },
-  closerd() { stop(); R = null; paint(); },
-  backup() {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify({decks, cards})], {type: 'application/json'}));
-    a.download = 'saras-flashcards-backup.json'; a.click();
+  voice(name, t) { // remember the voice; if idle, play a short sample so it can be heard
+    localStorage.voice = name;
+    if (R && R.on) return say(R.list, R.i);
+    const c = cardsOf(t.dataset.i).find(x => plain(x.front));
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter(c ? plain(c.front).slice(0, 200) : 'Hello! I am ready to read your cards.'));
   },
-  async restore(_, t) {
+  closerd() { stop(); R = null; paint(); },
+  async backup() { // a snapshot kept in the app itself (Firestore), listed under "Backups"
+    if (!decks.length && !cards.length) return toast('Nothing to back up yet');
     try {
-      const o = JSON.parse(await t.files[0].text()), n = Date.now();
-      o.decks.forEach((d, i) => save('decks', {id: d.id, title: d.title, t: d.t || n + i}));
-      o.cards.forEach((c, i) => save('cards', {id: c.id, deckId: c.deckId, front: conv(c.front), back: conv(c.back),
-        info: conv(c.info), included: c.included !== false, t: c.t || n + i}));
-      alert(`Restored ✅ (${o.cards.length} cards)`);
-    } catch { alert("That file isn't a flashcards backup."); }
+      await save('backups', {id: crypto.randomUUID(), t: Date.now(), nd: decks.length, nc: cards.length,
+        data: JSON.stringify({decks, cards, sources})});
+      toast('Backup saved');
+    } catch (e) { toast("Couldn't save the backup: " + e.message); }
+  },
+  async renb(id) {
+    const b = backups.find(x => x.id == id), t = await named('Backup name', b.name || new Date(b.t).toLocaleString());
+    if (t) save('backups', {...b, name: t});
+  },
+  async restoreb(id) {
+    const b = backups.find(x => x.id == id);
+    if (b && await sure('Restore this backup?', 'Its decks, cards and sources replace the current ones with the same id; everything else is kept.', 'Restore')) {
+      load(JSON.parse(b.data)); toast(`Restored ${plural(b.nc, 'card')}`);
+    }
+  },
+  async delb(id) {
+    const b = backups.find(x => x.id == id);
+    if (await sure('Delete this backup?', 'This cannot be undone.')) del('backups', id);
+  },
+  async restore(_, t) { // import a .json file (e.g. a backup from the Android app)
+    try { toast(`Imported ${plural(load(JSON.parse(await t.files[0].text())), 'card')}`); }
+    catch { toast("That file isn't a flashcards backup"); }
     t.value = '';
   },
 };
+// Buttons and checkboxes act on click; selects and text/colour/file inputs act on change.
 document.onclick = e => {
   const b = e.target.closest('[data-a]');
-  if (b && b.tagName != 'SELECT' && b.type != 'file') act[b.dataset.a](b.dataset.i, b);
+  if (b && b.tagName != 'SELECT' && (b.tagName != 'INPUT' || b.type == 'checkbox')) act[b.dataset.a](b.dataset.i, b);
 };
-document.onchange = e => { const t = e.target; if (t.dataset.a) act[t.dataset.a](t.value, t); };
-document.onmousedown = e => e.target.closest('.tb') && e.preventDefault(); // keep the text selection when tapping the toolbar
-document.onfocusin = () => document.execCommand('styleWithCSS', false, true);
+document.onchange = e => { const t = e.target; if (t.dataset.a && t.type != 'checkbox') act[t.dataset.a](t.value, t); };
+document.oninput = e => {
+  if (e.target.id == 'hx') { // live preview of the hex colour being added
+    const h = normHex(e.target.value);
+    if (h) $('#hxp').style.background = h;
+    return;
+  }
+  if (e.target.id != 'q') return; // search inside a deck
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll('.crow').forEach(r => r.hidden = !r.dataset.s.includes(q));
+};
+document.onkeydown = e => { // Enter / Space on a custom "button"
+  const t = e.target;
+  if (t.id == 'hx' && e.key == 'Enter') { e.preventDefault(); return act.cmadd(); }
+  if ((e.key == 'Enter' || e.key == ' ') && t.matches && t.matches('[role=button][tabindex]')) { e.preventDefault(); t.click(); }
+};
+document.onmousedown = e => e.target.closest('.tb button, .cmenu button') && e.preventDefault(); // keep the text selection when tapping the toolbar or its menus
+// The toolbar is shared by the three editors: remember the last selection inside one, so colour pickers can apply to it.
+let sel, host;
+document.onselectionchange = () => {
+  const s = getSelection(), n = s.anchorNode, el = n && (n.nodeType == 1 ? n : n.parentElement), h = el && el.closest('.ed');
+  if (h && s.rangeCount) { sel = s.getRangeAt(0).cloneRange(); host = h; }
+};
+const restore = () => { if (sel && host.isConnected) { host.focus(); const s = getSelection(); s.removeAllRanges(); s.addRange(sel); } };
+document.addEventListener('focusin', () => document.execCommand('styleWithCSS', false, true));
+// Back to writing (tap in the text or type): tuck the hex fields away again.
+['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, e => { if (cmS && e.target.closest && e.target.closest('.ed')) closeMenu(); }));
+// the colour-menu pages: keep the page dots in step with swiping
+document.addEventListener('scroll', e => {
+  const p = e.target;
+  if (p.classList && p.classList.contains('pages')) {
+    const i = Math.round(p.scrollLeft / p.clientWidth);
+    p.parentElement.querySelectorAll('.dots i').forEach((d, j) => d.classList.toggle('on', i == j));
+  }
+}, true);
 document.onpaste = e => { // paste as plain text so no foreign HTML gets in
   if (e.target.closest('.ed')) { e.preventDefault(); document.execCommand('insertText', false, e.clipboardData.getData('text/plain')); }
 };
+// Drag a field's grip up or down to make that field shorter or taller (works with touch and mouse).
+let drag;
+document.addEventListener('pointerdown', e => {
+  const g = e.target.closest && e.target.closest('.grip');
+  if (!g) return;
+  const f = g.closest('.fld');
+  drag = {f, y: e.clientY, h: f.getBoundingClientRect().height};
+  g.setPointerCapture(e.pointerId); e.preventDefault();
+});
+document.addEventListener('pointermove', e => { if (drag) drag.f.style.height = Math.max(110, drag.h + e.clientY - drag.y) + 'px'; });
+['pointerup', 'pointercancel'].forEach(ev => document.addEventListener(ev, () => drag = null));
 window.onhashchange = () => { if (R) { stop(); R = null; paint(); } render(); scrollTo(0, 0); };
 
 if (/^#\/[er]\//.test(location.hash)) location.hash = ''; // a reload can't resume an edit or a run
+if (LOCAL && sessionStorage.fcTest) enterTest();
 render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
